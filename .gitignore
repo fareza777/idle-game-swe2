@@ -5,3 +5,4 @@ android/build/
 android/local.properties
 *.keystore
 .DS_Store
+__pycache__/
