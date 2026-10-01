@@ -188,11 +188,7 @@ const UI = {
         <div class="mon-lvl">Lv ${m.level} · ${m.hp} HP · ${m.style}${boss?' <span class="tag-boss">BOSS</span>':""}${kills?` · <span class="ok">${kills} slain</span>`:""}</div></div>
       <button class="fight-btn" data-f="${m.id}">Fight</button></div>`;
   },
-  monIcon(m){
-    // bosses with art get portrait
-    if(m.isBoss){ const a=`assets/art/boss_${m.zone}.webp`; return `<img src="${a}" style="width:44px;height:44px;border-radius:9px;object-fit:cover" onerror="this.outerHTML='${m.icon||"👹"}'">`; }
-    return m.icon||"👾";
-  },
+  monIcon(m){ return MonAvatar.svg(m,40); },
 
   /* ---------- combat view ---------- */
   vCombat(v){
@@ -215,7 +211,7 @@ const UI = {
         <div class="arena-inner">
           <div class="vs">
             <div class="fighter">
-              <div class="fighter-av" id="fic-p">${Avatar.svg(Avatar.fightPose(w?.style||"melee"),s.cls,96)}</div>
+              <div class="f-stage"><div class="fighter-av" id="fic-p">${Avatar.svg(Avatar.fightPose(w?.style||"melee"),s.cls,92)}</div></div>
               <div class="f-name">${esc(s.name)}</div>
               <div class="bar hp f-hp"><i id="hp-player" style="width:${s.hp/Game.maxHp()*100}%"></i><i class="lag" id="hp-player-lag" style="width:${s.hp/Game.maxHp()*100}%"></i></div>
               <div class="tiny dim" id="hp-player-t">${Math.ceil(s.hp)}/${Game.maxHp()}</div>
@@ -223,7 +219,7 @@ const UI = {
             </div>
             <div style="font-size:22px;font-weight:900;color:var(--gold);padding-top:26px">⚔</div>
             <div class="fighter">
-              <div class="f-ico spawn" id="fic-m">${m.isBoss?this.monIconBig(m):`<span class="mon-stage"><span class="f-mon">${m.icon||"👾"}</span></span>`}</div>
+              <div class="f-stage"><div class="f-ico spawn" id="fic-m">${MonAvatar.svg(m,m.isBoss?108:90)}</div></div>
               <div class="f-name">${esc(m.name)}${m.isBoss?' <span class="tag-boss">BOSS</span>':""}</div>
               <div class="bar mhp f-hp"><i id="hp-mon" style="width:${c.monHp/m.hp*100}%"></i><i class="lag" id="hp-mon-lag" style="width:${c.monHp/m.hp*100}%"></i></div>
               <div class="tiny dim" id="hp-mon-t">${Math.ceil(c.monHp)}/${m.hp}</div>
@@ -243,10 +239,7 @@ const UI = {
       const f=Game.findFood(); if(f) Game.eat(f); else UI.toast("No food!","myth");
     };
   },
-  monIconBig(m){
-    if(m.isBoss){ return `<img src="assets/art/boss_${m.zone}.webp" style="width:56px;height:56px;border-radius:12px;object-fit:cover" onerror="this.outerHTML='${m.icon||"👹"}'">`; }
-    return m.icon||"👾";
-  },
+  monIconBig(m){ return MonAvatar.svg(m,64); },
   dmgFx(d){
     const tgt=document.getElementById(d.who==="mon"?"fic-m":"fic-p");
     const src=document.getElementById(d.who==="mon"?"fic-p":"fic-m");
