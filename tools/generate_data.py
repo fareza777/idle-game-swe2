@@ -6,7 +6,7 @@ data-driven: adding a monster/item/zone/quest is a data change only.
 
 Run:  python3 tools/generate_data.py
 """
-import json, math, os, random
+import json, math, os, random, re
 
 random.seed(42)
 OUT = os.path.join(os.path.dirname(__file__), "..", "web", "data")
@@ -561,6 +561,110 @@ for cid,cn,ic,price in COLLECTIBLES:
     add_item(cid,cn,"misc",ic,stackable=False,sellPrice=price)
 
 # monsters ----------------------------------------------------------------------
+# keyword -> emoji icon for monster cards (longest name word wins)
+MON_ICONS = {
+ "rat":"🐀","hare":"🐇","rabbit":"🐇","viper":"🐍","serpent":"🐍","cobra":"🐍",
+ "mamba":"🐍","boa":"🐍","xiuhcoatl":"🐍","boar":"🐗","wolf":"🐺","howler":"🐺",
+ "jackal":"🐺","hound":"🐕","fox":"🦊","lynx":"🐈","jaguar":"🐆","panther":"🐆",
+ "stalker":"🐆","marten":"🦦","stag":"🦌","elk":"🦌","moonstag":"🦌","antler":"🦌",
+ "antlers":"🦌","goat":"🐐","ram":"🐏","shepherd":"🐑","bat":"🦇","crow":"🐦‍⬛",
+ "raven":"🐦‍⬛","eagle":"🦅","hawk":"🦅","harpy":"🦅","hraesvelg":"🦅","owl":"🦉",
+ "gull":"🐦","petrel":"🐦","parrot":"🦜","feathered":"🪶","plume":"🪶",
+ "lizard":"🦎","saltscale":"🦎","gator":"🐊","frog":"🐸","toad":"🐸","eel":"🐟",
+ "angler":"🎣","snapper":"🐟","whale":"🐋","kraken":"🦑","ink":"🦑","diver":"🤿",
+ "crab":"🦀","beetle":"🪲","scarab":"🪲","spider":"🕷️","webspinner":"🕷️",
+ "scorpion":"🦂","wasp":"🐝","mosquito":"🦟","moth":"🦋","mite":"🐜","tick":"🐜",
+ "swarm":"🐝","worm":"🪱","burrower":"🐛","crawler":"🐛","leech":"🪱","slug":"🐌",
+ "drake":"🐉","dragon":"🐉","djinn":"🧞","golem":"🗿","titan":"🗿","colossus":"🗿",
+ "ettin":"🧌","giant":"🧌","hulk":"🧌","gnome":"👺","goblin":"👺","imp":"😈",
+ "fiend":"👿","devil":"👿","sprite":"🧚","wisp":"✨","mossling":"🌿","treant":"🌳",
+ "willow":"🌳","timber":"🪵","bark":"🪵","branch":"🌿","root":"🌱","vine":"🌿",
+ "briar":"🌿","thorned":"🌵","thornwraith":"🌵","cactus":"🌵","flytrap":"🪴",
+ "petal":"🌸","dandelion":"🌼","bloom":"🌺","clover":"🍀","thistle":"🌾",
+ "heath":"🌾","acorn":"🌰","pine":"🌲","grove":"🌲","canopy":"🌳","fungal":"🍄",
+ "spore":"🍄","mummy":"🧟","drowned":"🧟","corpse":"🧟","ghast":"👻","ghost":"👻",
+ "spectral":"👻","wraith":"👤","shade":"👤","shadow":"🌑","gloam":"🌑","wight":"💀",
+ "revenant":"💀","bone":"💀","bones":"💀","grave":"🪦","barrow":"🪦","gallows":"🪦",
+ "horror":"😱","dread":"💀","wailer":"😱","sorrow":"🥀","silence":"🤫",
+ "sleeping":"😴","hag":"🧙","witch":"🧙","druid":"🧙","acolyte":"🔮","priest":"🙏",
+ "oracle":"🔮","pilgrim":"🕯️","knight":"⚔️","paladin":"🌟","sentinel":"🛡️",
+ "bandit":"🗡️","pirate":"🏴‍☠️","captain":"🏴‍☠️","harpooner":"🔱","miner":"⛏️",
+ "foreman":"👷","picker":"👷","collector":"🧺","mimic":"🧰","elemental":"🌀",
+ "dervish":"🌀","mirage":"🌫️","mist":"🌫️","fog":"🌫️","veil":"🌫️","murk":"🌫️",
+ "whisper":"🫥","whispering":"🫥","echo":"🗯️","storm":"⛈️","thunder":"⚡",
+ "lightning":"⚡","bolt":"⚡","static":"⚡","voltan":"⚡","gale":"💨","squall":"🌪️",
+ "tempest":"🌪️","zephyr":"💨","wind":"💨","frost":"❄️","ice":"🧊","snow":"❄️",
+ "glacier":"🧊","blizzard":"🌨️","rime":"❄️","winter":"❄️","frozen":"🧊",
+ "magma":"🌋","lava":"🌋","eruption":"🌋","ember":"🔥","cinder":"🔥","ash":"🔥",
+ "flame":"🔥","fire":"🔥","pyre":"🔥","ignarion":"🔥","soot":"💨","smoke":"💨",
+ "scoria":"🪨","basalt":"🪨","slag":"🪨","crystal":"💎","gem":"💎","quartz":"💎",
+ "facet":"💎","shard":"💠","shardmother":"💠","prism":"💠","marble":"🪨",
+ "granite":"🪨","rock":"🪨","pebble":"🪨","crag":"⛰️","peak":"⛰️","shale":"🪨",
+ "skarn":"🪨","ore":"⛏️","bismuth":"💠","skysteel":"⚙️","star":"⭐","nova":"💫",
+ "comet":"☄️","meteor":"☄️","meteorite":"☄️","nebula":"🌌","cosmic":"🌌",
+ "astral":"🌠","starlight":"🌠","aurora":"🌈","skyfall":"☄️","skybreaker":"⛈️",
+ "void":"🕳️","rift":"🕳️","null":"⭕","god":"👑","godspark":"👑","seraph":"😇",
+ "valkyrie":"👼","herald":"📯","choir":"🎵","choral":"🎵","chorale":"🎵",
+ "chime":"🔔","halo":"😇","heavenly":"😇","ascendant":"🌟","radiant":"🌟",
+ "solar":"☀️","dawn":"🌅","aurum":"🪙","gilded":"🪙","crown":"👑","throne":"👑",
+ "king":"👑","queen":"👑","duchess":"👑","tyrant":"👹","bramblejaw":"🐺",
+ "mother":"🧿","chosen":"🌟","eyes":"👁️","gaze":"👁️","lurker":"👁️","maw":"🦷",
+ "teeth":"🦷","fang":"🦷","pulse":"💓","gravitas":"🪐","aeon":"⏳","first":"🌅",
+ "last":"🌑","final":"⚫","one":"🌗","devin":"🔮","omnis":"👁️","ishka":"🐍",
+ "kryss":"⚔️","rhosyn":"🌹","vulkar":"🌋","sethra":"🐍","moon":"🌙","night":"🌙",
+ "dusk":"🌆","deep":"🌊","trench":"🌊","pressure":"🌊","abyssal":"🌊","brine":"🌊",
+ "foam":"🌊","tide":"🌊","brinechain":"⚓","wreck":"⚓","sunken":"⚓","sand":"🏜️",
+ "dune":"🏜️","dust":"🌪️","desert":"🏜️","sirocco":"🏜️","oasis":"🏝️","bog":"🟤",
+ "mire":"🟤","fen":"🟤","marsh":"🟤","sump":"🟤","moor":"🟤","peat":"🟤",
+ "sludge":"🦠","rot":"🦠","plague":"🦠","toxic":"☣️","tar":"⚫","umber":"🟤",
+ "lantern":"🏮","glow":"✨","fallen":"🗡️","fell":"🗡️","dart":"🎯","needle":"🪡",
+ "sap":"💧","kelp":"🌿","hollow":"🕳️","twisted":"🌀","wild":"🌿","feral":"🐗",
+ "grass":"🌾","meadow":"🌾","field":"🌾","hedge":"🌿","fence":"🦎","highland":"⛰️",
+ "cavern":"🕳️","cave":"🕳️","quarry":"⛏️","mine":"⛏️","unpaid":"🪙","mad":"😵",
+ "pick":"⛏️","sunbleached":"☀️","white":"⬜","black":"⬛","grey":"🌫️","pale":"👻",
+ "dark":"🌑","beast":"🐗","spawn":"🐣","stoneheart":"🗿","sky":"☁️","cloud":"☁️",
+ "resonance":"🔔","resonant":"🔔","man":"👤","falling":"☄️","crater":"🕳️",
+ "thorn":"🌵",
+}
+# per-zone fallback pools so two monsters never share an icon within a zone
+ZONE_FALLBACK_ICONS = {
+ "greenhollow":["🌿","🍃","🌾","🌱","🦗","🐌","🍀","🌼"],
+ "pinewild":["🌲","🦉","🌰","🦡","🍄","🪵","🐿️","🦌"],
+ "embershard":["⛏️","🪨","💎","🔥","🦇","🧱","⚒️","🌋"],
+ "mistral":["🌊","🐚","🦀","🐟","⚓","🌫️","🪸","🐙"],
+ "barrowmere":["🟤","🐊","🦟","🪱","🌫️","🐸","💀","🌿"],
+ "sunscar":["🏜️","🦂","🌵","🐪","☀️","🌪️","🦎","🐍"],
+ "frostfang":["❄️","🧊","🐻‍❄️","🦭","⛄","🌨️","🐺","🦌"],
+ "gloamwood":["🌑","🦇","🕷️","🍄","🌫️","🐺","🦉","🌲"],
+ "cinderfall":["🔥","🌋","🪨","😈","🦎","🔥","💨","🗡️"],
+ "thundertop":["⚡","⛈️","🦅","🌩️","💨","🐏","☁️","🪨"],
+ "crystaldeep":["💎","💠","🔮","🕳️","🦇","❄️","⚪","🧊"],
+ "venomspire":["🐍","🦟","🐸","🌴","☣️","🕷️","🦎","🌺"],
+ "shrouded":["🌫️","👻","🫥","🪦","😱","🌑","🕯️","🧟"],
+ "stormveil":["⛈️","🌪️","⚡","🌩️","💨","🦅","☁️","🌦️"],
+ "dreadmire":["😱","💀","🕳️","🌑","🐛","🦠","👁️","🧌"],
+ "pyreheart":["🔥","🌋","👹","😈","🔥","☄️","🗡️","⚔️"],
+ "starfall":["⭐","☄️","💫","🌌","🌠","👽","🔭","✨"],
+ "riftwhispers":["🕳️","👁️","🫥","🌀","🗯️","🌫️","⭕","😶‍🌫️"],
+ "celestial":["😇","👼","☀️","🌟","👑","🎵","🔔","✨"],
+ "godspire":["👑","😇","🌟","⚡","👁️","🏛️","✨","🔱"],
+}
+def mon_icon(name, zid, used):
+    ws = re.findall(r"[a-z]+", name.lower())
+    best = None
+    for w in reversed(ws):   # creature noun usually comes last in the name
+        if w in MON_ICONS:
+            ic = MON_ICONS[w]
+            if ic not in used:
+                best = ic; break
+            if best is None: best = ic
+    if best is None or best in used:
+        for ic in ZONE_FALLBACK_ICONS.get(zid, []):
+            if ic not in used:
+                best = ic; break
+    used.add(best)
+    return best or "👾"
+
 STATUSES_BY_BIOME = {
     0:["bleed"],1:["bleed"],2:["burn"],3:["soak"],4:["poison"],5:["burn"],
     6:["freeze"],7:["stun"],8:["burn"],9:["shock"],10:["stun"],11:["poison"],
@@ -574,6 +678,7 @@ for zi,(zid,zname,biome,(lo,hi),pools,bosses) in enumerate(ZONES):
     tier = zone_tier(zi)
     metal = METALS[tier][0].lower(); wood = WOODS[tier][0].lower(); hide = HIDES[tier][0].lower()
     statuses = STATUSES_BY_BIOME.get(zi, [])
+    used_icons = set()
     for mi,mname in enumerate(pools):
         mlvl = lo + (hi-lo)*mi//max(1,len(pools)-1)
         style = ["melee","ranged","magic"][mi % 3]
@@ -593,6 +698,7 @@ for zi,(zid,zname,biome,(lo,hi),pools,bosses) in enumerate(ZONES):
         drops.append({"item":f"part_{PART_TYPES[mi%5][0].lower()}_{tier}","qty":1,"chance":0.09})
         drops.append({"item":"trap_bait","qty":1,"chance":0.03})
         mon = {"id":f"m_{zid}_{mi}","name":mname,"zone":zid,"level":mlvl,
+               "icon":mon_icon(mname,zid,used_icons),
                "hp":10+mlvl*6,"atk":2+mlvl*2,"def":mlvl*2,"str":2+mlvl*2,
                "style":style,"speed":2.6+(mi%3)*0.2,"xp":8+mlvl*5,
                "drops":drops,"isBoss":False,
@@ -615,6 +721,7 @@ for zi,(zid,zname,biome,(lo,hi),pools,bosses) in enumerate(ZONES):
             relic_iid = f"relic_{RELICS[zi][0].lower().replace(chr(39),chr(95)).replace(' ','_')}"
             drops.append({"item":relic_iid,"qty":1,"chance":0.04})
         monsters.append({"id":f"b_{zid}_{bi}","name":bname,"zone":zid,"level":blvl,
+            "icon":mon_icon(bname,zid,used_icons),
             "hp":40+blvl*16,"atk":4+blvl*3,"def":blvl*3,"str":4+blvl*3,
             "style":bstyle,"speed":2.8,"xp":60+blvl*18,
             "drops":drops,"isBoss":True,

@@ -172,9 +172,8 @@ const UI = {
   },
   monIcon(m){
     // bosses with art get portrait
-    if(m.isBoss){ const a=`assets/art/boss_${m.zone}.webp`; return `<img src="${a}" style="width:44px;height:44px;border-radius:9px;object-fit:cover" onerror="this.outerHTML='👹'">`; }
-    const byStyle={melee:"👾",ranged:"🧟",magic:"👻"};
-    return byStyle[m.style]||"👾";
+    if(m.isBoss){ const a=`assets/art/boss_${m.zone}.webp`; return `<img src="${a}" style="width:44px;height:44px;border-radius:9px;object-fit:cover" onerror="this.outerHTML='${m.icon||"👹"}'">`; }
+    return m.icon||"👾";
   },
 
   /* ---------- combat view ---------- */
@@ -216,8 +215,8 @@ const UI = {
     };
   },
   monIconBig(m){
-    if(m.isBoss){ return `<img src="assets/art/boss_${m.zone}.webp" style="width:56px;height:56px;border-radius:12px;object-fit:cover" onerror="this.outerHTML='👹'">`; }
-    return {melee:"👾",ranged:"🧟",magic:"👻"}[m.style]||"👾";
+    if(m.isBoss){ return `<img src="assets/art/boss_${m.zone}.webp" style="width:56px;height:56px;border-radius:12px;object-fit:cover" onerror="this.outerHTML='${m.icon||"👹"}'">`; }
+    return m.icon||"👾";
   },
   dmgFx(d){
     const el=document.getElementById(d.who==="mon"?"fic-m":"fic-p");
