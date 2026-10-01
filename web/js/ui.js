@@ -11,7 +11,13 @@ const UI = {
     Game.on("loot",(l)=>this.lootFx(l));
     Game.on("dmg",(d)=>this.dmgFx(d));
     Game.on("clog",(l)=>this.clog(l));
-    Game.on("levelup",()=>{});
+    Game.on("action",(a)=>this.actFx(a));
+    Game.on("heal",(h)=>this.healFx(h.amount));
+    Game.on("levelup",(l)=>this.lvlFx(l));
+    if(!document.getElementById("lootfeed")){
+      const f=document.createElement("div"); f.className="loot-feed"; f.id="lootfeed";
+      document.body.appendChild(f);
+    }
   },
 
   /* ---------- shell ---------- */
@@ -44,7 +50,8 @@ const UI = {
     if(act?.kind==="fight"&&s.combat){
       const m=DB.monById[s.combat.monId];
       const hpM=document.getElementById("hp-mon"); if(hpM) hpM.style.width=Math.max(0,s.combat.monHp/m.hp*100)+"%";
-      const hpP=document.getElementById("hp-player"); if(hpP) hpP.style.width=Math.max(0,s.hp/Game.maxHp()*100)+"%";
+      const hpP=document.getElementById("hp-player"); if(hpP){ hpP.style.width=Math.max(0,s.hp/Game.maxHp()*100)+"%";
+        hpP.closest(".bar")?.classList.toggle("low",s.hp/Game.maxHp()<0.25); }
       const hpT=document.getElementById("hp-mon-t"); if(hpT) hpT.textContent=`${Math.max(0,Math.ceil(s.combat.monHp))}/${m.hp}`;
       const hpPT=document.getElementById("hp-player-t"); if(hpPT) hpPT.textContent=`${Math.max(0,Math.ceil(s.hp))}/${Game.maxHp()}`;
       const stM=document.getElementById("st-mon");
@@ -74,7 +81,10 @@ const UI = {
           <div class="act-name">${esc(a.name)}</div>
           <div class="act-req">Lv ${a.level} ${DB.skillById[a.skill].name} · ${DB.zones[a.zone]?.name||""}${a.tool?` · ${a.tool}`:""}</div>
           <div class="act-out">→ ${a.output.qty}× ${od.name} · ${a.xp} XP ${a.consume?`<span class="dim">· uses ${a.consume.qty}× ${DB.itemById[a.consume.item].name}</span>`:""}</div>
-          ${doing?`<div class="bar act act-prog" data-prog="${a.id}"><i style="width:${Game.s.activity.prog/need*100}%"></i></div>`:""}
+          ${doing?`<div class="work-stage"><span class="ws-tool">${a.tool?(DB.itemById[a.tool]?.icon||"⛏️"):"⛏️"}</span>
+            <span class="ws-sparks"><i>✦</i><i>✦</i><i>✦</i></span>
+            <span class="ws-res">${od.icon}</span></div>
+            <div class="bar act act-prog" data-prog="${a.id}"><i style="width:${Game.s.activity.prog/need*100}%"></i></div>`:""}
         </div>
         <button class="act-go" ${chk.ok?"":"disabled"} data-g="${a.id}">${doing?"Stop":"Go"}</button>
       </div>`;
@@ -110,7 +120,10 @@ const UI = {
           <div class="act-name">${esc(r.name)} <span class="dim small">Lv ${r.level}</span></div>
           <div class="rec-in">${ins}</div>
           <div class="act-out">→ ${r.output.qty}× ${od.name} · ${r.xp} XP</div>
-          ${doing?`<div class="bar act act-prog" data-prog="${r.id}"><i style="width:${Game.s.activity.prog/(r.ticks*0.4)*100}%"></i></div>`:""}
+          ${doing?`<div class="work-stage"><span class="ws-tool">🔨</span>
+            <span class="ws-sparks"><i>✦</i><i>✦</i><i>✦</i></span>
+            <span class="ws-res">${od.icon}</span></div>
+            <div class="bar act act-prog" data-prog="${r.id}"><i style="width:${Game.s.activity.prog/(r.ticks*0.4)*100}%"></i></div>`:""}
         </div>
         <button class="act-go" ${chk.ok?"":"disabled"} data-r="${r.id}">${doing?"Stop":"Craft"}</button>
       </div>`;
@@ -186,7 +199,7 @@ const UI = {
         <div class="arena-inner">
           <div class="vs">
             <div class="fighter">
-              <div class="f-ico" id="fic-p">${Game.cls().icon}</div>
+              <img class="f-port" id="fic-p" src="assets/art/class_${s.cls}.webp" onerror="this.outerHTML='<div class=f-ico id=fic-p>${Game.cls().icon}</div>'" alt="">
               <div class="f-name">${esc(s.name)}</div>
               <div class="bar hp f-hp"><i id="hp-player" style="width:${s.hp/Game.maxHp()*100}%"></i></div>
               <div class="tiny dim" id="hp-player-t">${Math.ceil(s.hp)}/${Game.maxHp()}</div>
@@ -194,7 +207,7 @@ const UI = {
             </div>
             <div style="font-size:22px;font-weight:900;color:var(--gold);padding-top:26px">⚔</div>
             <div class="fighter">
-              <div class="f-ico" id="fic-m">${this.monIconBig(m)}</div>
+              <div class="f-ico" id="fic-m">${m.isBoss?this.monIconBig(m):`<span class="mon-stage"><span class="f-mon">${m.icon||"👾"}</span></span>`}</div>
               <div class="f-name">${esc(m.name)}${m.isBoss?' <span class="tag-boss">BOSS</span>':""}</div>
               <div class="bar mhp f-hp"><i id="hp-mon" style="width:${c.monHp/m.hp*100}%"></i></div>
               <div class="tiny dim" id="hp-mon-t">${Math.ceil(c.monHp)}/${m.hp}</div>
@@ -219,18 +232,62 @@ const UI = {
     return m.icon||"👾";
   },
   dmgFx(d){
-    const el=document.getElementById(d.who==="mon"?"fic-m":"fic-p");
-    if(!el) return;
-    el.classList.remove("hurt","strike"); void el.offsetWidth;
-    el.classList.add(d.miss?"strike":"hurt");
+    const tgt=document.getElementById(d.who==="mon"?"fic-m":"fic-p");
+    const src=document.getElementById(d.who==="mon"?"fic-p":"fic-m");
+    const arena=document.querySelector(".combat-arena");
+    if(!tgt||!arena) return;
+    const tp=d.who==="mon"?"t-m":"t-p";   // hit lands on mon → right side
+    // attacker lunges; ranged styles fire a projectile instead
+    const atkrStyle=d.who==="mon"
+      ?(Game.weapon()?.style||"melee")
+      :(DB.monById[Game.s?.combat?.monId]?.style||"melee");
+    if(src&&!d.status){
+      if(atkrStyle==="ranged"||atkrStyle==="magic"){
+        const p=document.createElement("div");
+        p.className=`proj proj-${atkrStyle==="magic"?"orb":"arrow"} ${d.who==="mon"?"pl":"mo"}`;
+        arena.appendChild(p); setTimeout(()=>p.remove(),420);
+      }else{
+        src.classList.remove("atk-l","atk-r"); void src.offsetWidth;
+        src.classList.add(d.who==="mon"?"atk-l":"atk-r");
+      }
+    }
+    // impact: slash (melee), hit flash, burst (crit)
+    setTimeout(()=>{
+      const now=document.getElementById(d.who==="mon"?"fic-m":"fic-p");
+      if(!now) return;
+      if(!d.miss&&!d.status&&atkrStyle==="melee"){
+        const s=document.createElement("div"); s.className=`slash ${tp}`;
+        arena.appendChild(s); setTimeout(()=>s.remove(),320);
+      }
+      if(!d.miss){
+        const f=document.createElement("div"); f.className=`hitflash ${tp}`;
+        arena.appendChild(f); setTimeout(()=>f.remove(),300);
+      }
+      if(d.crit){
+        const b=document.createElement("div"); b.className=`burst ${tp}`;
+        arena.appendChild(b); setTimeout(()=>b.remove(),520);
+      }
+      now.classList.remove("hurt","strike","dodge"); void now.offsetWidth;
+      now.classList.add(d.miss?"dodge":"hurt");
+      const n=document.createElement("div");
+      n.className=`dmg-num${d.crit?" crit":""}${d.status?" status":""}`;
+      n.style.left=(d.who==="mon"?62+Math.random()*20:8+Math.random()*15)+"%";
+      n.style.top=(30+Math.random()*30)+"%";
+      n.style.color=d.miss?"#8a93a8":(d.crit?"#ffd75e":(d.status?"#c98aff":(d.who==="mon"?"#ff9a8a":"#ff6a6a")));
+      n.textContent=d.miss?"miss":(d.crit?`${d.amount}!`:d.amount);
+      arena.appendChild(n); setTimeout(()=>n.remove(),1000);
+    },atkrStyle!=="melee"&&!d.status?250:120);
+    // death animation
+    if(!d.miss&&d.who==="mon"&&Game.s?.combat){
+      const m=DB.monById[Game.s.combat.monId];
+      if(m&&Game.s.combat.monHp<=0){ tgt.classList.add("dead"); }
+    }
+  },
+  healFx(amt){
+    const arena=document.querySelector(".combat-arena"); if(!arena) return;
     const n=document.createElement("div");
-    n.className="dmg-num";
-    n.style.left=(d.who==="mon"?62+Math.random()*20:8+Math.random()*15)+"%";
-    n.style.top=(30+Math.random()*30)+"%";
-    n.style.color=d.miss?"#8a93a8":(d.crit?"#ffd75e":(d.who==="mon"?"#ff9a8a":"#ff6a6a"));
-    n.textContent=d.miss?"miss":(d.crit?`${d.amount}!`:d.amount);
-    document.querySelector(".combat-arena")?.appendChild(n);
-    setTimeout(()=>n.remove(),900);
+    n.className="heal-num t-p"; n.textContent=`+${amt}`;
+    arena.appendChild(n); setTimeout(()=>n.remove(),1000);
   },
   clog(l){
     const el=document.getElementById("clog"); if(!el) return;
@@ -427,6 +484,16 @@ const UI = {
   lootFx(l){
     const d=DB.itemById[l.item]; if(!d) return;
     const r=l.rar?DB.rarById[l.rar]:null;
+    // mini feed: every drop slides in bottom-left
+    const feed=document.getElementById("lootfeed");
+    if(feed){
+      const c=document.createElement("div");
+      c.className="drop-chip";
+      c.innerHTML=`${d.icon} <b style="color:${r?r.color:"var(--tx)"}">+${l.qty}</b> <span class="dim">${esc(d.name)}</span>`;
+      feed.appendChild(c);
+      while(feed.children.length>4) feed.firstChild.remove();
+      setTimeout(()=>c.remove(),1600);
+    }
     if(!r) return; // only pop equippable rarity drops
     if(r.tier<3 && l.qty<2) return;
     const p=document.createElement("div");
@@ -437,6 +504,28 @@ const UI = {
     document.body.appendChild(p);
     setTimeout(()=>p.remove(),1600);
     Sfx.play("loot");
+  },
+  // float "+N icon" on the card being worked (gather/craft)
+  actFx(a){
+    const id=a.type==="gather"?a.act?.id:a.rec?.id;
+    if(!id) return;
+    const card=document.querySelector(`[data-prog="${id}"]`)?.closest(".act-card,.recipe");
+    if(!card) return;
+    const out=a.type==="gather"?a.act?.output:a.rec?.output;
+    const od=out?DB.itemById[out.item]:null;
+    const f=document.createElement("div");
+    f.className="fx-float";
+    f.textContent=`+${out?.qty||1} ${od?.icon||""}`;
+    card.appendChild(f);
+    setTimeout(()=>f.remove(),900);
+  },
+  lvlFx(l){
+    const f=document.createElement("div");
+    f.className="lvl-flash";
+    f.innerHTML=`<div class="lvl-tag">⬆ ${DB.skillById[l.skill]?.name||""} ${l.level}</div>`;
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),1000);
+    Sfx.play("level");
   },
   modal(html){
     const m=document.getElementById("modal");

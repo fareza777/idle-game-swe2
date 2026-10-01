@@ -202,10 +202,13 @@ const Game = {
     if(!d?.food && !d?.potion) return false;
     if(!this.take(itemId,1)) return false;
     if(d.food){ this.s.hp=Math.min(this.maxHp(),this.s.hp+d.food.heal);
-      this.emit("toast",`${d.icon} +${d.food.heal} HP`); }
+      this.emit("toast",`${d.icon} +${d.food.heal} HP`);
+      this.emit("heal",{amount:d.food.heal}); }
     if(d.potion){
       const p=d.potion;
-      if(p.kind==="heal"){ this.s.hp=Math.min(this.maxHp(),this.s.hp+p.mag*4); }
+      if(p.kind==="heal"){ const amt=p.mag*4;
+        this.s.hp=Math.min(this.maxHp(),this.s.hp+amt);
+        this.emit("heal",{amount:amt}); }
       else if(p.kind==="buff"){
         // temporary skill boost: store as buff status on player
         this.addPlayerStatus({id:"focus"}, p.mag); // simplified: focus
