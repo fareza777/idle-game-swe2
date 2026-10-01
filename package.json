@@ -1,0 +1,22 @@
+{
+  "name": "duskspire-idle",
+  "version": "1.0.0",
+  "description": "Duskspire — Idle Realm. An original idle skilling RPG (21 skills, 21 zones, 300+ monsters, 25 rarities, offline progress).",
+  "private": true,
+  "scripts": {
+    "data": "python3 tools/generate_data.py",
+    "art": "python3 tools/generate_art.py",
+    "serve": "npx serve web -l 8080",
+    "test": "node tools/smoke_test.js",
+    "android:sync": "cap sync android",
+    "android:build": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/android": "^6.1.2",
+    "serve": "^14.2.3"
+  }
+}

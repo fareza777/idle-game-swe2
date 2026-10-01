@@ -1,0 +1,14 @@
+{
+  "name": "Duskspire — Idle Realm",
+  "short_name": "Duskspire",
+  "description": "An idle skilling RPG: 21 skills, 21 zones, 300+ monsters, offline progress.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d14",
+  "theme_color": "#0b0d14",
+  "icons": [
+    {"src": "assets/art/icon.webp", "sizes": "512x512", "type": "image/webp"},
+    {"src": "assets/icon.png", "sizes": "1024x1024", "type": "image/png"}
+  ]
+}

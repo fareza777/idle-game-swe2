@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Duskspire</string>
+    <string name="title_activity_main">Duskspire</string>
+    <string name="package_name">com.duskspire.idle</string>
+    <string name="custom_url_scheme">com.duskspire.idle</string>
+</resources>
