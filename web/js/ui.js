@@ -81,7 +81,7 @@ const UI = {
           <div class="act-name">${esc(a.name)}</div>
           <div class="act-req">Lv ${a.level} ${DB.skillById[a.skill].name} · ${DB.zones[a.zone]?.name||""}${a.tool?` · ${a.tool}`:""}</div>
           <div class="act-out">→ ${a.output.qty}× ${od.name} · ${a.xp} XP ${a.consume?`<span class="dim">· uses ${a.consume.qty}× ${DB.itemById[a.consume.item].name}</span>`:""}</div>
-          ${doing?`<div class="work-stage"><span class="ws-tool">${a.tool?(DB.itemById[a.tool]?.icon||"⛏️"):"⛏️"}</span>
+          ${doing?`<div class="work-stage"><span class="ws-av">${Avatar.svg(Avatar.poseFor(a.skill),Game.s.cls,40)}</span>
             <span class="ws-sparks"><i>✦</i><i>✦</i><i>✦</i></span>
             <span class="ws-res">${od.icon}</span></div>
             <div class="bar act act-prog" data-prog="${a.id}"><i style="width:${Game.s.activity.prog/need*100}%"></i></div>`:""}
@@ -120,7 +120,7 @@ const UI = {
           <div class="act-name">${esc(r.name)} <span class="dim small">Lv ${r.level}</span></div>
           <div class="rec-in">${ins}</div>
           <div class="act-out">→ ${r.output.qty}× ${od.name} · ${r.xp} XP</div>
-          ${doing?`<div class="work-stage"><span class="ws-tool">🔨</span>
+          ${doing?`<div class="work-stage"><span class="ws-av">${Avatar.svg(Avatar.poseFor(sk),Game.s.cls,40)}</span>
             <span class="ws-sparks"><i>✦</i><i>✦</i><i>✦</i></span>
             <span class="ws-res">${od.icon}</span></div>
             <div class="bar act act-prog" data-prog="${r.id}"><i style="width:${Game.s.activity.prog/(r.ticks*0.4)*100}%"></i></div>`:""}
@@ -199,7 +199,7 @@ const UI = {
         <div class="arena-inner">
           <div class="vs">
             <div class="fighter">
-              <img class="f-port" id="fic-p" src="assets/art/class_${s.cls}.webp" onerror="this.outerHTML='<div class=f-ico id=fic-p>${Game.cls().icon}</div>'" alt="">
+              <div class="fighter-av" id="fic-p">${Avatar.svg(Avatar.fightPose(w?.style||"melee"),s.cls,96)}</div>
               <div class="f-name">${esc(s.name)}</div>
               <div class="bar hp f-hp"><i id="hp-player" style="width:${s.hp/Game.maxHp()*100}%"></i></div>
               <div class="tiny dim" id="hp-player-t">${Math.ceil(s.hp)}/${Game.maxHp()}</div>
@@ -358,7 +358,7 @@ const UI = {
     const s=Game.s;
     const st=Game.gearStats(),w=Game.weapon();
     let h=`<div class="card"><div class="row">
-        <div style="font-size:34px">${Game.cls().icon}</div>
+        <div>${Avatar.svg(Avatar.fightPose(w?.style||"melee"),s.cls,64)}</div>
         <div class="grow"><b>${esc(s.name)}</b> <span class="dim">the ${Game.cls().name}</span>
           <div class="small dim">${esc(Game.cls().desc)}</div></div>
         <div class="pill gold">CLv ${Game.combatLevel()}</div></div>

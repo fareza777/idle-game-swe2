@@ -509,3 +509,87 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   filter:drop-shadow(0 6px 14px #000c)}
 .mon-stage{display:inline-block;padding:2px 10px;border-radius:16px;
   background:#0006;border:1px solid #ffffff14}
+
+/* ---------- HERO RIG (svg character) ---------- */
+.av{display:block;overflow:visible}
+.av-move{transform-box:view-box;transform-origin:30px 78px;animation:avBreathe 2.4s ease-in-out infinite}
+.av-head{transform-box:view-box;transform-origin:30px 26px;animation:avHead 2.4s ease-in-out infinite}
+.av-armr{transform-box:view-box;transform-origin:40px 38px}
+.av-arml{transform-box:view-box;transform-origin:20px 38px}
+.av-tool{transform-box:fill-box;transform-origin:50% 100%}
+@keyframes avBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
+@keyframes avHead{0%,100%{transform:rotate(0)}50%{transform:rotate(2deg)}}
+@keyframes armSwing{0%{transform:rotate(-14deg)}45%{transform:rotate(-78deg)}58%{transform:rotate(-92deg)}72%{transform:rotate(-70deg)}100%{transform:rotate(-14deg)}}
+@keyframes armChop{0%{transform:rotate(-10deg)}40%{transform:rotate(-88deg)}52%{transform:rotate(-96deg)}100%{transform:rotate(-10deg)}}
+@keyframes armSmith{0%{transform:rotate(-8deg)}30%{transform:rotate(-72deg)}44%{transform:rotate(-84deg)}56%{transform:rotate(-66deg)}100%{transform:rotate(-8deg)}}
+@keyframes armStir{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-14deg)}}
+@keyframes armTilt{0%,100%{transform:rotate(-58deg)}50%{transform:rotate(-46deg)}}
+@keyframes armWhittle{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(-52deg)}}
+@keyframes armUp{0%,100%{transform:rotate(-64deg)}50%{transform:rotate(-56deg)}}
+@keyframes armDraw{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-60deg)}}
+@keyframes armSneak{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(-42deg)}}
+@keyframes armTend{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(-58deg)}}
+@keyframes avSquat{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(3px) scaleY(.96)}}
+@keyframes avHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.4px)}}
+@keyframes chipFly{0%{transform:translate(0,0);opacity:1}70%{opacity:1}100%{transform:translate(-9px,-14px);opacity:0}}
+@keyframes chipFly2{0%{transform:translate(0,0);opacity:0}15%{opacity:1}100%{transform:translate(8px,-18px);opacity:0}}
+@keyframes fireFl{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+@keyframes steamUp{0%{transform:translateY(0);opacity:.7}100%{transform:translateY(-12px);opacity:0}}
+@keyframes ripP{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+@keyframes bubUp{0%{transform:translateY(4px);opacity:.9}100%{transform:translateY(-8px);opacity:0}}
+@keyframes wispF{0%,100%{transform:translate(0,0)}33%{transform:translate(3px,-5px)}66%{transform:translate(-3px,-2px)}}
+@keyframes bobBob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@keyframes orbPulse{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.3);opacity:.7}}
+@keyframes runeG{0%,100%{opacity:.5}50%{opacity:1}}
+/* pose wiring */
+.av-mine .av-armr,.av-smith .av-armr{animation:armSmith .95s ease-in-out infinite}
+.av-mine .av-armr{animation:armSwing 1.15s ease-in-out infinite}
+.av-chop .av-armr{animation:armChop 1.3s ease-in-out infinite}
+.av-farm .av-armr{animation:armTend 1.4s ease-in-out infinite}
+.av-farm .av-move{animation:avSquat 1.4s ease-in-out infinite}
+.av-cook .av-armr{animation:armStir 1.2s ease-in-out infinite}
+.av-alch .av-armr{animation:armTilt 1.6s ease-in-out infinite}
+.av-craft .av-armr,.av-fletch .av-armr,.av-eng .av-armr{animation:armWhittle .8s ease-in-out infinite}
+.av-eng .av-armr{animation-duration:1.1s}
+.av-rune .av-armr,.av-divine .av-armr{animation:armUp 2.2s ease-in-out infinite}
+.av-rune .av-arml,.av-divine .av-arml{animation:armUp 2.2s ease-in-out infinite reverse}
+.av-rune .av-move,.av-divine .av-move{animation:avHover 2.2s ease-in-out infinite}
+.av-hunt .av-armr,.av-bow .av-armr{animation:armDraw 1.6s ease-in-out infinite}
+.av-fish .av-armr{transform:rotate(-38deg)}
+.av-fish .t-bobber{animation:bobBob 1.3s ease-in-out infinite}
+.av-thief .av-move{animation:avSquat 1.8s ease-in-out infinite}
+.av-thief .av-armr{animation:armSneak 1.8s ease-in-out infinite}
+.av-staff .t-orb{animation:orbPulse 1.8s ease-in-out infinite}
+/* prop fx */
+.chip.c1{animation:chipFly .95s ease-out infinite}
+.chip.c2{animation:chipFly2 .95s ease-out infinite}
+.fire.f1{transform-box:fill-box;transform-origin:50% 100%;animation:fireFl .5s ease-in-out infinite}
+.fire.f2{transform-box:fill-box;transform-origin:50% 100%;animation:fireFl .4s ease-in-out .1s infinite}
+.steam.s1{animation:steamUp 1.4s ease-out infinite}
+.rip{transform-box:fill-box;transform-origin:50% 50%;animation:ripP 1.6s ease-out infinite}
+.rip.r2{animation-delay:.8s}
+.bub.b1{animation:bubUp 1.2s ease-in infinite}
+.bub.b2{animation:bubUp 1.5s ease-in .4s infinite}
+.wisp{animation:wispF 3s ease-in-out infinite}
+.wisp.w2{animation-delay:1s}.wisp.w3{animation-delay:2s}
+.runesym{animation:runeG 1.6s ease-in-out infinite}
+/* combat fighter wrapper (player) */
+.fighter-av{position:relative;display:inline-block}
+.fighter-av .av{animation:none}
+.fighter-av .av-move{animation:avBreathe 2.4s ease-in-out infinite}
+.fighter-av.atk-l .av-move{animation:avLunge .32s cubic-bezier(.3,.6,.4,1)}
+.fighter-av.atk-l .av-armr{animation:avStrike .32s cubic-bezier(.3,.6,.4,1)!important}
+.fighter-av.atk-l .av-bow .av-armr{animation:armDraw .4s ease-out!important}
+.fighter-av.atk-l .av-staff .av-armr{animation:armUp .45s ease-out!important}
+.fighter-av.atk-l .av-staff .t-orb{animation:orbPulse .3s ease-in-out 2}
+.fighter-av.hurt .av-move{animation:avFlinch .32s ease-out}
+.fighter-av.dodge .av-move{animation:avDodge .3s ease-out}
+.fighter-av.dead .av-move{animation:avFall .65s cubic-bezier(.4,0,.7,.4) forwards}
+@keyframes avLunge{0%{transform:translateX(0)}45%{transform:translateX(16px)}100%{transform:translateX(0)}}
+@keyframes avStrike{0%{transform:rotate(-10deg)}45%{transform:rotate(-96deg)}100%{transform:rotate(-10deg)}}
+@keyframes avFlinch{0%{transform:translateX(0) rotate(0)}30%{transform:translateX(-7px) rotate(-8deg)}100%{transform:translateX(0) rotate(0)}}
+@keyframes avDodge{0%{transform:translateX(0)}40%{transform:translateX(-9px) rotate(-10deg)}100%{transform:translateX(0)}}
+@keyframes avFall{0%{transform:rotate(0) translateY(0);opacity:1}70%{opacity:1}100%{transform:rotate(82deg) translateY(-4px);opacity:.25}}
+/* mini avatar in work-stage */
+.ws-av{flex:0 0 auto;margin:-2px 0 -4px}
+.ws-av .av-move{animation-duration:1.8s}
