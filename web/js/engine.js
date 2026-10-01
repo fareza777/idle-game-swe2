@@ -557,6 +557,7 @@ const Game = {
       // also completes the matching main quest implicitly via kill req
     }
     Sfx.play("die");
+    this.emit("kill",{mon:m,drops});
     // continue fighting same monster (respawn)
     this.s.combat={monId:m.id,monHp:m.hp,cdP:0,cdM:m.speed,
       statusesP:c.statusesP,statusesM:{}};

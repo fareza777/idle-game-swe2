@@ -14,6 +14,7 @@ const UI = {
     Game.on("action",(a)=>this.actFx(a));
     Game.on("heal",(h)=>this.healFx(h.amount));
     Game.on("levelup",(l)=>this.lvlFx(l));
+    Game.on("kill",(k)=>this.killFx(k));
     if(!document.getElementById("lootfeed")){
       const f=document.createElement("div"); f.className="loot-feed"; f.id="lootfeed";
       document.body.appendChild(f);
@@ -34,6 +35,8 @@ const UI = {
     document.querySelectorAll(".tab").forEach(b=>
       b.classList.toggle("on",b.dataset.tab===this.tab));
     const v=document.getElementById("view");
+    if(this._lastTab!==this.tab){ this._lastTab=this.tab;
+      v.classList.remove("view-in"); void v.offsetWidth; v.classList.add("view-in"); }
     const fn={train:this.vTrain,craft:this.vCraft,fight:this.vFight,bag:this.vBag,
       hero:this.vHero,quests:this.vQuests,more:this.vMore}[this.tab]||this.vTrain;
     fn.call(this,v);
@@ -50,8 +53,10 @@ const UI = {
     if(act?.kind==="fight"&&s.combat){
       const m=DB.monById[s.combat.monId];
       const hpM=document.getElementById("hp-mon"); if(hpM) hpM.style.width=Math.max(0,s.combat.monHp/m.hp*100)+"%";
+      const lagM=document.getElementById("hp-mon-lag"); if(lagM) lagM.style.width=Math.max(0,s.combat.monHp/m.hp*100)+"%";
       const hpP=document.getElementById("hp-player"); if(hpP){ hpP.style.width=Math.max(0,s.hp/Game.maxHp()*100)+"%";
         hpP.closest(".bar")?.classList.toggle("low",s.hp/Game.maxHp()<0.25); }
+      const lagP=document.getElementById("hp-player-lag"); if(lagP) lagP.style.width=Math.max(0,s.hp/Game.maxHp()*100)+"%";
       const hpT=document.getElementById("hp-mon-t"); if(hpT) hpT.textContent=`${Math.max(0,Math.ceil(s.combat.monHp))}/${m.hp}`;
       const hpPT=document.getElementById("hp-player-t"); if(hpPT) hpPT.textContent=`${Math.max(0,Math.ceil(s.hp))}/${Game.maxHp()}`;
       const stM=document.getElementById("st-mon");
@@ -193,23 +198,34 @@ const UI = {
   vCombat(v){
     const s=Game.s,c=s.combat,m=DB.monById[c.monId],z=DB.zoneById[s.activity.id];
     const w=Game.weapon();
+    const biome=(z.biome||"").toLowerCase();
+    const bk=/snow|frost|tundra|whiteout/.test(biome)?"snow"
+      :/ember|burn|volcano|fire|smoulder|ash/.test(biome)?"ember"
+      :/coast|sea|tide|wreck|throat|abyss/.test(biome)?"bubble"
+      :/desert|dune|sand|waste/.test(biome)?"sand"
+      :/swamp|barrow|mire|moor|hollow/.test(biome)?"wisp"
+      :/mine|cave|crystal|quarry|deep/.test(biome)?"mote"
+      :/storm|peak|thunder|highland|wind/.test(biome)?"spark"
+      :/star|rift|celest|void|god|whisper|crater/.test(biome)?"star"
+      :"leaf";
     v.innerHTML=`
-      <div class="combat-arena">
+      <div class="combat-arena arena-${bk} ${m.isBoss?"boss":''}">
         <div class="arena-bg" style="background-image:url('${z.art}')"></div>
+        <div class="arena-parts">${"<i></i>".repeat(7)}</div>
         <div class="arena-inner">
           <div class="vs">
             <div class="fighter">
               <div class="fighter-av" id="fic-p">${Avatar.svg(Avatar.fightPose(w?.style||"melee"),s.cls,96)}</div>
               <div class="f-name">${esc(s.name)}</div>
-              <div class="bar hp f-hp"><i id="hp-player" style="width:${s.hp/Game.maxHp()*100}%"></i></div>
+              <div class="bar hp f-hp"><i id="hp-player" style="width:${s.hp/Game.maxHp()*100}%"></i><i class="lag" id="hp-player-lag" style="width:${s.hp/Game.maxHp()*100}%"></i></div>
               <div class="tiny dim" id="hp-player-t">${Math.ceil(s.hp)}/${Game.maxHp()}</div>
               <div class="f-status" id="st-player"></div>
             </div>
             <div style="font-size:22px;font-weight:900;color:var(--gold);padding-top:26px">⚔</div>
             <div class="fighter">
-              <div class="f-ico" id="fic-m">${m.isBoss?this.monIconBig(m):`<span class="mon-stage"><span class="f-mon">${m.icon||"👾"}</span></span>`}</div>
+              <div class="f-ico spawn" id="fic-m">${m.isBoss?this.monIconBig(m):`<span class="mon-stage"><span class="f-mon">${m.icon||"👾"}</span></span>`}</div>
               <div class="f-name">${esc(m.name)}${m.isBoss?' <span class="tag-boss">BOSS</span>':""}</div>
-              <div class="bar mhp f-hp"><i id="hp-mon" style="width:${c.monHp/m.hp*100}%"></i></div>
+              <div class="bar mhp f-hp"><i id="hp-mon" style="width:${c.monHp/m.hp*100}%"></i><i class="lag" id="hp-mon-lag" style="width:${c.monHp/m.hp*100}%"></i></div>
               <div class="tiny dim" id="hp-mon-t">${Math.ceil(c.monHp)}/${m.hp}</div>
               <div class="f-status" id="st-mon"></div>
             </div>
@@ -269,6 +285,7 @@ const UI = {
       }
       now.classList.remove("hurt","strike","dodge"); void now.offsetWidth;
       now.classList.add(d.miss?"dodge":"hurt");
+      if(d.crit){ arena.classList.remove("shake"); void arena.offsetWidth; arena.classList.add("shake"); }
       const n=document.createElement("div");
       n.className=`dmg-num${d.crit?" crit":""}${d.status?" status":""}`;
       n.style.left=(d.who==="mon"?62+Math.random()*20:8+Math.random()*15)+"%";
@@ -282,6 +299,14 @@ const UI = {
       const m=DB.monById[Game.s.combat.monId];
       if(m&&Game.s.combat.monHp<=0){ tgt.classList.add("dead"); }
     }
+  },
+  killFx(k){
+    const arena=document.querySelector(".combat-arena"); if(!arena) return;
+    const b=document.createElement("div");
+    b.className="kill-banner";
+    b.innerHTML=`<span>☠ ${esc(k.mon.name.split(",")[0])} slain</span>${k.drops?.length?`<i>${k.drops.length} drop${k.drops.length>1?"s":""}</i>`:""}`;
+    arena.appendChild(b); setTimeout(()=>b.remove(),1100);
+    Sfx.play("win");
   },
   healFx(amt){
     const arena=document.querySelector(".combat-arena"); if(!arena) return;
@@ -317,8 +342,9 @@ const UI = {
     for(const [key,qty] of entries){
       const [iid,rar]=key.split("@");
       const d=DB.itemById[iid]; if(!d) continue;
-      const rc=rar?(DB.rarById[rar]?.color||"#9aa5b1"):null;
-      h+=`<div class="cell" data-i="${key}" title="${esc(d.name)}">
+      const rr=rar?DB.rarById[rar]:null;
+      const rc=rr?.color||null;
+      h+=`<div class="cell ${rr&&rr.tier>=3?"cell-glow":""}" data-i="${key}" title="${esc(d.name)}" ${rc?`style="--rc:${rc}"`:''}>
         ${rc?`<div class="rar" style="border-color:${rc}"></div>`:""}
         ${d.icon}<span class="q">${qty>999?fmtNum(qty):qty}</span></div>`;
     }
@@ -515,7 +541,8 @@ const UI = {
     const od=out?DB.itemById[out.item]:null;
     const f=document.createElement("div");
     f.className="fx-float";
-    f.textContent=`+${out?.qty||1} ${od?.icon||""}`;
+    const xp=a.type==="gather"?a.act?.xp:a.rec?.xp;
+    f.innerHTML=`+${out?.qty||1} ${od?.icon||""}<span class="fx-xp">+${xp||0} xp</span>`;
     card.appendChild(f);
     setTimeout(()=>f.remove(),900);
   },

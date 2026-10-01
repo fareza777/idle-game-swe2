@@ -593,3 +593,115 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 /* mini avatar in work-stage */
 .ws-av{flex:0 0 auto;margin:-2px 0 -4px}
 .ws-av .av-move{animation-duration:1.8s}
+
+/* ---------- AAA POLISH PACK ---------- */
+/* trailing damage bar (pale bar lags behind real HP) */
+.bar>i.lag{background:linear-gradient(90deg,#e8d6a2,#f5ead0)!important;opacity:.5;
+  transition:width .9s cubic-bezier(.2,.8,.3,1) .12s;z-index:0}
+.bar>i:not(.lag){z-index:1}
+/* arena biome particles */
+.arena-parts{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.arena-parts i{position:absolute;width:5px;height:5px;border-radius:50%;opacity:0;
+  animation:partDrift 6s linear infinite}
+.arena-parts i:nth-child(1){left:12%;animation-delay:0s}
+.arena-parts i:nth-child(2){left:28%;animation-delay:1.4s;animation-duration:7.4s}
+.arena-parts i:nth-child(3){left:44%;animation-delay:.7s;animation-duration:5.6s}
+.arena-parts i:nth-child(4){left:58%;animation-delay:2.2s}
+.arena-parts i:nth-child(5){left:70%;animation-delay:.3s;animation-duration:8s}
+.arena-parts i:nth-child(6){left:82%;animation-delay:1.8s;animation-duration:6.6s}
+.arena-parts i:nth-child(7){left:94%;animation-delay:2.9s;animation-duration:7.8s}
+@keyframes partDrift{0%{top:104%;opacity:0;transform:translateX(0) scale(.7)}
+  12%{opacity:.85}85%{opacity:.6}100%{top:-4%;opacity:0;transform:translateX(-22px) scale(1.15)}}
+.arena-ember .arena-parts i{background:#ff9a4a;box-shadow:0 0 6px #ff7a2a;border-radius:2px;
+  animation-name:partEmber}
+@keyframes partEmber{0%{top:104%;opacity:0;transform:rotate(0) translateX(0)}
+  12%{opacity:.9}100%{top:-4%;opacity:0;transform:rotate(240deg) translateX(-14px)}}
+.arena-snow .arena-parts i{background:#dff2ff;box-shadow:0 0 4px #bfe6ff;animation-name:partSnow}
+@keyframes partSnow{0%{top:-4%;opacity:0;transform:translateX(0)}
+  12%{opacity:.9}100%{top:104%;opacity:0;transform:translateX(20px)}}
+.arena-bubble .arena-parts i{background:#7fd6ff;box-shadow:0 0 5px #4ab6e6;border-radius:50%;
+  width:6px;height:6px}
+.arena-sand .arena-parts i{background:#e8c87a;box-shadow:none;border-radius:1px;opacity:0;
+  animation-name:partSand}
+@keyframes partSand{0%{left:-4%;top:60%;opacity:0}15%{opacity:.5}
+  100%{left:104%;top:40%;opacity:0}}
+.arena-sand .arena-parts i{top:auto}
+.arena-sand .arena-parts i:nth-child(odd){top:38%}
+.arena-sand .arena-parts i:nth-child(even){top:66%}
+.arena-wisp .arena-parts i{background:#a8ffd8;box-shadow:0 0 8px #5fe6a8;width:7px;height:7px}
+.arena-mote .arena-parts i{background:#c9a2ff;box-shadow:0 0 6px #9a6ae6}
+.arena-spark .arena-parts i{background:#ffe66a;box-shadow:0 0 7px #ffd23a;
+  border-radius:0;transform:rotate(45deg)}
+.arena-star .arena-parts i{background:#e8d6ff;box-shadow:0 0 8px #b48aff;border-radius:50%;
+  animation-name:partStar}
+@keyframes partStar{0%,100%{opacity:.15;transform:scale(.7)}
+  50%{opacity:.95;transform:scale(1.3)}}
+.arena-star .arena-parts i{top:12%}
+.arena-star .arena-parts i:nth-child(odd){top:46%}
+.arena-star .arena-parts i:nth-child(3n){top:74%}
+.arena-leaf .arena-parts i{background:#7ac96a;box-shadow:0 0 4px #4a9a4a;border-radius:50% 0;
+  animation-name:partLeaf}
+@keyframes partLeaf{0%{top:-4%;opacity:0;transform:rotate(0) translateX(0)}
+  12%{opacity:.8}100%{top:104%;opacity:0;transform:rotate(300deg) translateX(-16px)}}
+/* crit shake + boss rim + vignette */
+.combat-arena.shake{animation:arenaShake .28s}
+@keyframes arenaShake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}
+  40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-1px)}80%{transform:translate(2px,1px)}}
+.combat-arena.boss{box-shadow:0 0 0 1.5px #e05a4d55,0 0 26px #e05a4d22 inset;
+  animation:bossRim 2s ease-in-out infinite}
+@keyframes bossRim{0%,100%{box-shadow:0 0 0 1.5px #e05a4d44,0 0 20px #e05a4d18 inset}
+  50%{box-shadow:0 0 0 2px #e05a4d88,0 0 34px #e05a4d30 inset}}
+.combat-arena::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:radial-gradient(120% 90% at 50% 40%,transparent 62%,#000a 130%)}
+/* kill banner */
+.kill-banner{position:absolute;left:0;right:0;top:44%;z-index:9;text-align:center;
+  pointer-events:none;animation:killSweep 1.05s cubic-bezier(.2,.7,.3,1) forwards}
+.kill-banner span{display:inline-block;font-weight:900;font-size:15px;letter-spacing:.12em;
+  color:#ffd75e;text-shadow:0 2px 10px #000,0 0 22px #ffb22a66}
+.kill-banner i{display:block;font-style:normal;font-size:10px;color:#cfd6e6;letter-spacing:.08em}
+@keyframes killSweep{0%{transform:translateY(12px) scale(.8);opacity:0}
+  22%{transform:translateY(0) scale(1.06);opacity:1}
+  70%{transform:scale(1);opacity:1}100%{transform:scale(1.04);opacity:0}}
+/* monster spawn-in */
+.f-ico.spawn .f-mon,.f-ico.spawn>img{animation:monSpawn .55s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes monSpawn{0%{transform:scale(.4) translateY(10px);opacity:0}
+  60%{transform:scale(1.12) translateY(-2px);opacity:1}100%{transform:scale(1) translateY(0)}}
+/* tab/view slide-in */
+#view.view-in>*{animation:viewSlide .28s cubic-bezier(.2,.8,.3,1) backwards}
+#view.view-in>*:nth-child(2){animation-delay:.03s}
+#view.view-in>*:nth-child(3){animation-delay:.06s}
+#view.view-in>*:nth-child(4){animation-delay:.09s}
+#view.view-in>*:nth-child(5){animation-delay:.12s}
+#view.view-in>*:nth-child(n+6){animation-delay:.15s}
+@keyframes viewSlide{0%{transform:translateY(14px);opacity:0}100%{transform:none;opacity:1}}
+/* item rarity glow */
+.cell{transition:transform .15s,box-shadow .2s}
+.cell-glow{box-shadow:0 0 10px -1px var(--rc,#9aa5b1),inset 0 0 8px -4px var(--rc,#9aa5b1)}
+.cell:hover{transform:translateY(-2px);box-shadow:0 4px 14px #000a}
+/* status chips pulse */
+.f-status i{animation:stPulse 1.6s ease-in-out infinite}
+@keyframes stPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+/* zone art slow pan + card hovers */
+.zone-bg{animation:zonePan 26s ease-in-out infinite alternate}
+@keyframes zonePan{0%{transform:scale(1) translateX(0)}100%{transform:scale(1.14) translateX(-4%)}}
+.zone-card:not(.locked):hover,.mon-row:hover,.act-card:not(.locked):hover{
+  transform:translateY(-1px);border-color:#ffffff2e}
+.act-card,.mon-row,.zone-card,.cell,.slot{transition:transform .15s,border-color .2s,box-shadow .2s}
+/* xp micro-text on float */
+.fx-xp{display:block;font-size:8px;color:var(--xp);letter-spacing:.04em}
+/* quest claimable pulse */
+.quest .btn-primary:not([disabled]){animation:claimPulse 1.8s ease-in-out infinite}
+@keyframes claimPulse{0%,100%{box-shadow:0 0 0 0 #ffd75e00}50%{box-shadow:0 0 12px 2px #ffd75e55}}
+/* small-caps section titles */
+.sec-title{font-variant:small-caps;letter-spacing:.14em}
+/* attack anticipation on monster icons */
+.f-ico.atk-l,.f-ico.atk-r{animation-timing-function:cubic-bezier(.4,-.2,.4,1)}
+/* wind-up anticipation: pull back, snap forward */
+@keyframes avStrike{0%{transform:rotate(-10deg)}28%{transform:rotate(22deg)}
+  62%{transform:rotate(-98deg)}100%{transform:rotate(-10deg)}}
+@keyframes avLunge{0%{transform:translateX(0)}30%{transform:translateX(-6px)}
+  62%{transform:translateX(17px)}100%{transform:translateX(0)}}
+@keyframes atkL{0%{transform:translateX(0) scale(1)}28%{transform:translateX(-9px) scale(.94)}
+  58%{transform:translateX(30px) scale(1.15) rotate(4deg)}100%{transform:translateX(0)}}
+@keyframes atkR{0%{transform:translateX(0) scale(1)}28%{transform:translateX(9px) scale(.94)}
+  58%{transform:translateX(-30px) scale(1.15) rotate(-4deg)}100%{transform:translateX(0)}}
